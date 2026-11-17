@@ -46,7 +46,7 @@ between the top-quartile and top-tercile cutoffs.
 ## Tests and style
 
 ```
-pytest test_analysis.py
+python test_analysis.py
 flake8
 ```
 

@@ -3,17 +3,17 @@ Pratheek Madamala
 CSE 163 <SECTION>
 
 Unit tests for rate calculations, ACS cleaning, MOE aggregation, ranking,
-and cutoff classification using synthetic in-file test data. Can be run
-with either `pytest test_analysis.py` or `python test_analysis.py`.
+and cutoff classification using synthetic in-file test data. Run with:
+`python test_analysis.py`.
 """
 
 import json
+import math
 from pathlib import Path
 import tempfile
 
 import numpy as np
 import pandas as pd
-import pytest
 
 import analysis as an
 import data_prep as dp
@@ -45,14 +45,14 @@ def make_rates(lang: list[float], hear: list[float]) -> pd.DataFrame:
 def test_compute_rate_by_hand() -> None:
     """Tests compute_rate on a basic hand-checked percentage (10 / 40)."""
     rate = dp.compute_rate(pd.Series([10.0]), pd.Series([40.0]))
-    assert rate.iloc[0] == pytest.approx(25.0)
+    assert math.isclose(rate.iloc[0], 25.0)
 
 
 def test_zero_denominator_gives_nan_not_error() -> None:
     """Tests that compute_rate returns NaN for zero denominators."""
     rate = dp.compute_rate(pd.Series([0.0, 5.0]), pd.Series([0.0, 10.0]))
     assert np.isnan(rate.iloc[0])
-    assert rate.iloc[1] == pytest.approx(50.0)
+    assert math.isclose(rate.iloc[1], 50.0)
 
 
 def test_language_rate_sums_twelve_fields() -> None:
@@ -63,7 +63,7 @@ def test_language_rate_sums_twelve_fields() -> None:
     df = pd.DataFrame([dict(row, GEOID='53033000100', NAME='a')])
     out = dp.build_rates(df, dp.LANG_NUM, dp.LANG_DEN, 'lang')
     assert out['lang_num'].iloc[0] == 12
-    assert out['lang_rate'].iloc[0] == pytest.approx(25.0)
+    assert math.isclose(out['lang_rate'].iloc[0], 25.0)
 
 
 def test_hearing_rate_hand_calculation() -> None:
@@ -78,7 +78,7 @@ def test_hearing_rate_hand_calculation() -> None:
     out = dp.build_rates(pd.DataFrame([row]), dp.HEAR_NUM, dp.HEAR_DEN,
                          'hear')
     assert out['hear_den'].iloc[0] == 100
-    assert out['hear_rate'].iloc[0] == pytest.approx(15.0)
+    assert math.isclose(out['hear_rate'].iloc[0], 15.0)
 
 
 def test_missing_estimate_makes_rate_nan_not_zero() -> None:
@@ -123,8 +123,12 @@ def test_geoid_keeps_leading_zeros_and_has_eleven_digits() -> None:
 def test_duplicate_geoid_is_rejected() -> None:
     """Tests that check_unique raises ValueError on duplicate GEOIDs."""
     df = pd.DataFrame({'GEOID': ['1', '1']})
-    with pytest.raises(ValueError):
+    raised = False
+    try:
         dp.check_unique(df, 'GEOID', 'test table')
+    except ValueError:
+        raised = True
+    assert raised
 
 
 def test_unmatched_geoids_are_reported() -> None:
@@ -141,7 +145,7 @@ def test_proportion_moe_without_denominator_error() -> None:
     moe = dp.proportion_moe(
         pd.Series([50.0]), pd.Series([100.0]),
         pd.Series([10.0]), pd.Series([0.0]))
-    assert moe.iloc[0] == pytest.approx(10.0)
+    assert math.isclose(moe.iloc[0], 10.0)
 
 
 def test_sum_moe_counts_only_largest_zero_estimate_moe() -> None:
@@ -152,7 +156,7 @@ def test_sum_moe_counts_only_largest_zero_estimate_moe() -> None:
         'C_E': 0.0, 'C_M': 2.0,
     }])
     moe = dp.sum_moe(df, ['A_', 'B_', 'C_'])
-    assert moe.iloc[0] == pytest.approx(5.0)
+    assert math.isclose(moe.iloc[0], 5.0)
 
 
 def test_sum_moe_returns_nan_when_any_component_missing() -> None:

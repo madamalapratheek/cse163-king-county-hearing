@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+.DS_Store
+
+# Raw Census downloads (see README.md for download links)
+data/
+
+# Large generated interactive HTML maps (re-created by python main.py)
+results/figures/*.html

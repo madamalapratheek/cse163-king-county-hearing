@@ -1,15 +1,25 @@
-"""Rank tracts, classify them at percentile cutoffs, and summarize."""
+"""
+Pratheek Madamala
+CSE 163 <SECTION>
+
+Ranks tracts by limited-English rate and count, classifies tracts into
+high-barrier overlap groups at quantile cutoffs, and computes summary stats.
+"""
+
+import pandas as pd
 
 TOP_QUARTILE = 0.75
 TOP_TERCILE = 2 / 3
 GROUPS = ['High on both', 'Language only', 'Hearing only', 'Neither']
 
 
-def rank_language(df):
-    """Rank tracts with a valid language rate, highest rate first.
+def rank_language(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Rank tracts in df with a non-missing lang_rate from highest to lowest.
 
-    Ties in the rate are broken by GEOID. Adds rank_pct (rank by rate)
-    and rank_count (rank by estimated count, ties broken by GEOID).
+    Ties are broken by ascending GEOID. Returns a copy sorted by lang_rate
+    with added integer columns rank_pct (by rate) and rank_count (by
+    lang_num).
     """
     valid = df.dropna(subset=['lang_rate']).copy()
     by_pct = valid.sort_values(
@@ -21,18 +31,24 @@ def rank_language(df):
     return by_pct.merge(counts[['GEOID', 'rank_count']], on='GEOID')
 
 
-def cutoff_values(df, quantile):
-    """Return (language threshold, hearing threshold) at a quantile."""
-    return (df['lang_rate'].quantile(quantile),
-            df['hear_rate'].quantile(quantile))
+def cutoff_values(df: pd.DataFrame, quantile: float) -> tuple[float, float]:
+    """
+    Return (language_threshold, hearing_threshold) for lang_rate and hear_rate
+    in df at the given quantile.
+    """
+    return (float(df['lang_rate'].quantile(quantile)),
+            float(df['hear_rate'].quantile(quantile)))
 
 
-def classify(df, quantile):
-    """Label each tract as high on both, one, or neither measure.
+def classify(
+    df: pd.DataFrame, quantile: float
+) -> tuple[pd.DataFrame, float, float]:
+    """
+    Label each tract in df as high on both, one, or neither barrier at the
+    given quantile cutoff.
 
-    A tract is high on a measure when its rate meets or exceeds the
-    cutoff, so tied values at the cutoff are all included. Returns the
-    labeled table and the two thresholds.
+    Tracts whose rate meets or exceeds the cutoff are marked high so ties at
+    the cutoff are included. Returns (labeled_df, lang_cut, hear_cut).
     """
     lang_cut, hear_cut = cutoff_values(df, quantile)
     out = df.copy()
@@ -45,27 +61,44 @@ def classify(df, quantile):
     return out, lang_cut, hear_cut
 
 
-def group_counts(labeled):
-    """Count tracts in each of the four groups, always in GROUPS order."""
+def group_counts(labeled: pd.DataFrame) -> pd.Series:
+    """
+    Count tracts in labeled for each of the four barrier groups.
+
+    Returns a Series indexed in GROUPS order with 0 for any absent group.
+    """
     counts = labeled['group'].value_counts()
     return counts.reindex(GROUPS, fill_value=0)
 
 
-def count_ties_at_cutoff(df, quantile):
-    """Count tracts whose rate equals the cutoff exactly, per measure."""
+def count_ties_at_cutoff(
+    df: pd.DataFrame, quantile: float
+) -> tuple[int, int]:
+    """
+    Return (lang_ties, hear_ties), the counts of tracts in df whose rate
+    equals the cutoff exactly at the given quantile.
+    """
     lang_cut, hear_cut = cutoff_values(df, quantile)
     return (int((df['lang_rate'] == lang_cut).sum()),
             int((df['hear_rate'] == hear_cut).sum()))
 
 
-def new_at_wider_cutoff(narrow, wide):
-    """GEOIDs high on both at the wider cutoff but not the narrow one."""
+def new_at_wider_cutoff(
+    narrow: pd.DataFrame, wide: pd.DataFrame
+) -> list[str]:
+    """
+    Return a sorted list of GEOIDs labeled 'High on both' in wide but not in
+    narrow.
+    """
     narrow_ids = set(narrow.loc[narrow['group'] == 'High on both', 'GEOID'])
     wide_ids = set(wide.loc[wide['group'] == 'High on both', 'GEOID'])
     return sorted(wide_ids - narrow_ids)
 
 
-def summary_stats(df, columns):
-    """Mean, standard deviation, min, quartiles and max per column."""
+def summary_stats(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
+    """
+    Return a seven-number summary (mean, std, min, 25%, 50%, 75%, max) for
+    each column listed in columns from df.
+    """
     stats = df[columns].describe().T
     return stats[['mean', 'std', 'min', '25%', '50%', '75%', 'max']]

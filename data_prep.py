@@ -1,6 +1,8 @@
 """
-Pratheek Madamala
-CSE 163 <SECTION>
+Name: Krishna Pratheek Madamala
+Section: AC
+CSE 163, Autumn 2026
+Final Project, Part 2: Exploratory Data Analysis
 
 Loads Census ACS tables and tract boundaries, cleans missing values, and
 computes King County tract-level language and hearing barrier rates with

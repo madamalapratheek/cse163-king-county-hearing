@@ -1,6 +1,8 @@
 """
-Pratheek Madamala
-CSE 163 <SECTION>
+Name: Krishna Pratheek Madamala
+Section: AC
+CSE 163, Autumn 2026
+Final Project, Part 2: Exploratory Data Analysis
 
 Ranks tracts by limited-English rate and count, classifies tracts into
 high-barrier overlap groups at quantile cutoffs, and computes summary stats.

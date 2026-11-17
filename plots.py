@@ -1,6 +1,8 @@
 """
-Pratheek Madamala
-CSE 163 <SECTION>
+Name: Krishna Pratheek Madamala
+Section: AC
+CSE 163, Autumn 2026
+Final Project, Part 2: Exploratory Data Analysis
 
 Creates interactive Plotly maps, scatter plots, and grouped bar charts for
 the King County older-adult language and hearing barrier analysis.

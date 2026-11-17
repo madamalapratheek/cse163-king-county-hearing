@@ -1,0 +1,426 @@
+{
+  "report": {
+    "tracts_language": 495,
+    "tracts_hearing": 495,
+    "tracts_boundaries": 495,
+    "unmatched_language_hearing": 0,
+    "unmatched_geometry": 0,
+    "language_columns_raw": 274,
+    "hearing_columns_raw": 162,
+    "zero_or_missing_lang_den": 3,
+    "zero_or_missing_hear_den": 3,
+    "null_lang_rate": 3,
+    "null_hear_rate": 3
+  },
+  "language_hearing_shape": [
+    495,
+    10
+  ],
+  "with_geometry_shape": [
+    495,
+    11
+  ],
+  "both_valid_rows": 492,
+  "stats_language_hearing": {
+    "lang_rate": {
+      "mean": 14.4,
+      "std": 13.72,
+      "min": 0.0,
+      "25%": 3.8,
+      "50%": 10.87,
+      "75%": 21.14,
+      "max": 74.51
+    },
+    "hear_rate": {
+      "mean": 12.39,
+      "std": 8.52,
+      "min": 0.0,
+      "25%": 6.7,
+      "50%": 11.61,
+      "75%": 16.37,
+      "max": 86.96
+    },
+    "lang_num": {
+      "mean": 90.67,
+      "std": 97.35,
+      "min": 0.0,
+      "25%": 21.0,
+      "50%": 63.0,
+      "75%": 131.0,
+      "max": 697.0
+    },
+    "lang_den": {
+      "mean": 648.28,
+      "std": 315.75,
+      "min": 0.0,
+      "25%": 445.0,
+      "50%": 618.0,
+      "75%": 836.5,
+      "max": 2400.0
+    },
+    "hear_den": {
+      "mean": 635.34,
+      "std": 308.16,
+      "min": 0.0,
+      "25%": 438.0,
+      "50%": 601.0,
+      "75%": 812.5,
+      "max": 2400.0
+    }
+  },
+  "stats_both_valid": {
+    "lang_rate": {
+      "mean": 14.4,
+      "std": 13.72,
+      "min": 0.0,
+      "25%": 3.8,
+      "50%": 10.87,
+      "75%": 21.14,
+      "max": 74.51
+    },
+    "hear_rate": {
+      "mean": 12.39,
+      "std": 8.52,
+      "min": 0.0,
+      "25%": 6.7,
+      "50%": 11.61,
+      "75%": 16.37,
+      "max": 86.96
+    },
+    "lang_num": {
+      "mean": 91.22,
+      "std": 97.38,
+      "min": 0.0,
+      "25%": 22.0,
+      "50%": 63.0,
+      "75%": 131.5,
+      "max": 697.0
+    },
+    "lang_den": {
+      "mean": 652.23,
+      "std": 312.61,
+      "min": 21.0,
+      "25%": 446.0,
+      "50%": 619.5,
+      "75%": 837.0,
+      "max": 2400.0
+    },
+    "hear_den": {
+      "mean": 639.21,
+      "std": 305.06,
+      "min": 21.0,
+      "25%": 441.5,
+      "50%": 603.0,
+      "75%": 813.75,
+      "max": 2400.0
+    }
+  },
+  "correlation_pearson": 0.032,
+  "correlation_spearman": 0.049,
+  "language": {
+    "n_ranked": 492,
+    "top10_pct": [
+      {
+        "GEOID": "53033011002",
+        "NAME": "Census Tract 110.02; King County; Washington",
+        "lang_num": 532,
+        "lang_den": 714,
+        "lang_rate": 74.51,
+        "lang_moe": 20.61,
+        "rank_pct": 1,
+        "rank_count": 4
+      },
+      {
+        "GEOID": "53033009100",
+        "NAME": "Census Tract 91; King County; Washington",
+        "lang_num": 697,
+        "lang_den": 957,
+        "lang_rate": 72.83,
+        "lang_moe": 26.79,
+        "rank_pct": 2,
+        "rank_count": 1
+      },
+      {
+        "GEOID": "53033011001",
+        "NAME": "Census Tract 110.01; King County; Washington",
+        "lang_num": 639,
+        "lang_den": 975,
+        "lang_rate": 65.54,
+        "lang_moe": 19.52,
+        "rank_pct": 3,
+        "rank_count": 2
+      },
+      {
+        "GEOID": "53033029506",
+        "NAME": "Census Tract 295.06; King County; Washington",
+        "lang_num": 174,
+        "lang_den": 268,
+        "lang_rate": 64.93,
+        "lang_moe": 36.85,
+        "rank_pct": 4,
+        "rank_count": 82
+      },
+      {
+        "GEOID": "53033023808",
+        "NAME": "Census Tract 238.08; King County; Washington",
+        "lang_num": 102,
+        "lang_den": 159,
+        "lang_rate": 64.15,
+        "lang_moe": 28.28,
+        "rank_pct": 5,
+        "rank_count": 174
+      },
+      {
+        "GEOID": "53033005202",
+        "NAME": "Census Tract 52.02; King County; Washington",
+        "lang_num": 32,
+        "lang_den": 53,
+        "lang_rate": 60.38,
+        "lang_moe": 92.21,
+        "rank_pct": 6,
+        "rank_count": 334
+      },
+      {
+        "GEOID": "53033022804",
+        "NAME": "Census Tract 228.04; King County; Washington",
+        "lang_num": 246,
+        "lang_den": 408,
+        "lang_rate": 60.29,
+        "lang_moe": 32.54,
+        "rank_pct": 7,
+        "rank_count": 32
+      },
+      {
+        "GEOID": "53033007405",
+        "NAME": "Census Tract 74.05; King County; Washington",
+        "lang_num": 59,
+        "lang_den": 102,
+        "lang_rate": 57.84,
+        "lang_moe": 74.27,
+        "rank_pct": 8,
+        "rank_count": 254
+      },
+      {
+        "GEOID": "53033025201",
+        "NAME": "Census Tract 252.01; King County; Washington",
+        "lang_num": 276,
+        "lang_den": 530,
+        "lang_rate": 52.08,
+        "lang_moe": 36.03,
+        "rank_pct": 9,
+        "rank_count": 24
+      },
+      {
+        "GEOID": "53033008900",
+        "NAME": "Census Tract 89; King County; Washington",
+        "lang_num": 458,
+        "lang_den": 882,
+        "lang_rate": 51.93,
+        "lang_moe": 29.13,
+        "rank_pct": 10,
+        "rank_count": 5
+      }
+    ],
+    "top10_count": [
+      {
+        "GEOID": "53033009100",
+        "NAME": "Census Tract 91; King County; Washington",
+        "lang_num": 697,
+        "lang_den": 957,
+        "lang_rate": 72.83,
+        "lang_moe": 26.79,
+        "rank_pct": 2,
+        "rank_count": 1
+      },
+      {
+        "GEOID": "53033011001",
+        "NAME": "Census Tract 110.01; King County; Washington",
+        "lang_num": 639,
+        "lang_den": 975,
+        "lang_rate": 65.54,
+        "lang_moe": 19.52,
+        "rank_pct": 3,
+        "rank_count": 2
+      },
+      {
+        "GEOID": "53033010402",
+        "NAME": "Census Tract 104.02; King County; Washington",
+        "lang_num": 539,
+        "lang_den": 1158,
+        "lang_rate": 46.55,
+        "lang_moe": 3.63,
+        "rank_pct": 20,
+        "rank_count": 3
+      },
+      {
+        "GEOID": "53033011002",
+        "NAME": "Census Tract 110.02; King County; Washington",
+        "lang_num": 532,
+        "lang_den": 714,
+        "lang_rate": 74.51,
+        "lang_moe": 20.61,
+        "rank_pct": 1,
+        "rank_count": 4
+      },
+      {
+        "GEOID": "53033008900",
+        "NAME": "Census Tract 89; King County; Washington",
+        "lang_num": 458,
+        "lang_den": 882,
+        "lang_rate": 51.93,
+        "lang_moe": 29.13,
+        "rank_pct": 10,
+        "rank_count": 5
+      },
+      {
+        "GEOID": "53033030314",
+        "NAME": "Census Tract 303.14; King County; Washington",
+        "lang_num": 446,
+        "lang_den": 1339,
+        "lang_rate": 33.31,
+        "lang_moe": 29.36,
+        "rank_pct": 48,
+        "rank_count": 6
+      },
+      {
+        "GEOID": "53033011700",
+        "NAME": "Census Tract 117; King County; Washington",
+        "lang_num": 440,
+        "lang_den": 872,
+        "lang_rate": 50.46,
+        "lang_moe": 17.84,
+        "rank_pct": 15,
+        "rank_count": 7
+      },
+      {
+        "GEOID": "53033027100",
+        "NAME": "Census Tract 271; King County; Washington",
+        "lang_num": 416,
+        "lang_den": 892,
+        "lang_rate": 46.64,
+        "lang_moe": 20.74,
+        "rank_pct": 19,
+        "rank_count": 8
+      },
+      {
+        "GEOID": "53033011901",
+        "NAME": "Census Tract 119.01; King County; Washington",
+        "lang_num": 384,
+        "lang_den": 986,
+        "lang_rate": 38.95,
+        "lang_moe": 11.87,
+        "rank_pct": 31,
+        "rank_count": 9
+      },
+      {
+        "GEOID": "53033026004",
+        "NAME": "Census Tract 260.04; King County; Washington",
+        "lang_num": 377,
+        "lang_den": 1161,
+        "lang_rate": 32.47,
+        "lang_moe": 19.06,
+        "rank_pct": 53,
+        "rank_count": 10
+      }
+    ],
+    "top10_overlap_pct_and_count": 4,
+    "rank_example": {
+      "GEOID": "53033005202",
+      "NAME": "Census Tract 52.02; King County; Washington",
+      "lang_num": 32,
+      "lang_den": 53,
+      "lang_rate": 60.38,
+      "lang_moe": 92.21,
+      "rank_pct": 6,
+      "rank_count": 334
+    },
+    "top10_min_den": 53.0
+  },
+  "overlap": {
+    "Top quartile": {
+      "language_threshold": 21.142,
+      "hearing_threshold": 16.367,
+      "group_counts": {
+        "High on both": 28,
+        "Language only": 95,
+        "Hearing only": 95,
+        "Neither": 274
+      },
+      "tied_at_language_cutoff": 0,
+      "tied_at_hearing_cutoff": 0,
+      "high_both_share": 0.0569
+    },
+    "Top tercile": {
+      "language_threshold": 16.963,
+      "hearing_threshold": 14.694,
+      "group_counts": {
+        "High on both": 55,
+        "Language only": 109,
+        "Hearing only": 109,
+        "Neither": 219
+      },
+      "tied_at_language_cutoff": 0,
+      "tied_at_hearing_cutoff": 0,
+      "high_both_share": 0.1118
+    },
+    "entering_at_tercile": [
+      "53033000201",
+      "53033000202",
+      "53033000403",
+      "53033001702",
+      "53033010402",
+      "53033011700",
+      "53033011901",
+      "53033011902",
+      "53033020600",
+      "53033020700",
+      "53033022606",
+      "53033023000",
+      "53033023604",
+      "53033024701",
+      "53033025302",
+      "53033025806",
+      "53033026001",
+      "53033026500",
+      "53033027300",
+      "53033028902",
+      "53033029203",
+      "53033029405",
+      "53033029804",
+      "53033029901",
+      "53033030407",
+      "53033031101",
+      "53033031709"
+    ],
+    "high_both_quartile_ids": [
+      "53033007405",
+      "53033008900",
+      "53033009000",
+      "53033010001",
+      "53033010002",
+      "53033010101",
+      "53033011001",
+      "53033011102",
+      "53033011200",
+      "53033021904",
+      "53033023300",
+      "53033023808",
+      "53033024400",
+      "53033025500",
+      "53033026003",
+      "53033026802",
+      "53033027100",
+      "53033028100",
+      "53033029004",
+      "53033029101",
+      "53033029305",
+      "53033029508",
+      "53033030203",
+      "53033030204",
+      "53033030310",
+      "53033030405",
+      "53033032313",
+      "53033032331"
+    ]
+  }
+}

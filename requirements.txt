@@ -1,0 +1,6 @@
+pandas
+geopandas
+plotly
+kaleido
+pytest
+flake8

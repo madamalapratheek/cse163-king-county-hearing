@@ -38,12 +38,19 @@ B18102), and maps where both are high.
 python main.py
 ```
 
-Outputs go to `results/`: `summary.json` (every number used in the report),
-CSV tables, and `figures/` (HTML and PNG). The file
-`results/figures/fig4_overlap_map_selectable.html` has a dropdown to switch
-between the top-quartile and top-tercile cutoffs.
+Outputs go to `results/`:
+- `summary.json`: pipeline metrics, reproducible raw-column missingness
+  counts, seven-number summaries (for rates, counts, denominators, and
+  margins of error), correlations, top-ten rankings, and overlap counts.
+- CSV tables: `overlap_top_quartile.csv`, `overlap_top_tercile.csv`,
+  `top10_language_pct.csv`, and `top10_language_count.csv`.
+- `figures/`: PNG figures for the report (and optional interactive HTML maps,
+  such as `results/figures/fig4_overlap_map_selectable.html` with a cutoff
+  selector dropdown).
 
 ## Tests and style
+
+Run the 17 unit tests and flake8 style check:
 
 ```
 python test_analysis.py
@@ -55,5 +62,5 @@ flake8
 - `data_prep.py`: loading, cleaning, rates, margins of error, joins
 - `analysis.py`: ranking, cutoffs, groups, summary statistics
 - `plots.py`: Plotly figures
-- `main.py`: runs the whole analysis
-- `test_analysis.py`: tests with built-in test data
+- `main.py`: runs the full pipeline and exports results
+- `test_analysis.py`: 17 unit tests with built-in test data

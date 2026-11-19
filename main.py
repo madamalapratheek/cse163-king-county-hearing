@@ -26,11 +26,12 @@ HEAR_JSON = 'data/raw/hearing.json'
 TRACT_SHP = 'data/tl_2024_53_tract/tl_2024_53_tract.shp'
 OUT = 'results'
 STAT_COLUMNS = [
-    'lang_rate', 'hear_rate', 'lang_num', 'lang_den', 'hear_num', 'hear_den',
+    'lang_rate', 'hear_rate', 'lang_num', 'lang_den',
+    'hear_num', 'hear_den', 'lang_moe', 'hear_moe',
 ]
 
 
-def load_and_join() -> tuple[pd.DataFrame, gpd.GeoDataFrame, dict[str, int]]:
+def load_and_join() -> tuple[pd.DataFrame, gpd.GeoDataFrame, dict[str, Any]]:
     """
     Load both ACS JSON tables and the King County tract shapefile, compute
     rates and MOEs, and join them one-to-one on GEOID.
@@ -48,7 +49,11 @@ def load_and_join() -> tuple[pd.DataFrame, gpd.GeoDataFrame, dict[str, int]]:
     hear = dp.build_rates(hear_raw, dp.HEAR_NUM, dp.HEAR_DEN, 'hear')
     lang_hear, miss_lh = dp.join_one_to_one(lang, hear.drop(columns='NAME'))
     full, miss_geo = dp.join_one_to_one(tracts, lang_hear)
-    report = {
+    lang_cols = [f + s for f in dp.LANG_DEN + dp.LANG_NUM for s in ('E', 'M')]
+    hear_cols = [f + s for f in dp.HEAR_DEN + dp.HEAR_NUM for s in ('E', 'M')]
+    lang_missing = {col: int(lang_raw[col].isna().sum()) for col in lang_cols}
+    hear_missing = {col: int(hear_raw[col].isna().sum()) for col in hear_cols}
+    report: dict[str, Any] = {
         'tracts_language': len(lang_raw),
         'tracts_hearing': len(hear_raw),
         'tracts_boundaries': len(tracts),
@@ -56,6 +61,12 @@ def load_and_join() -> tuple[pd.DataFrame, gpd.GeoDataFrame, dict[str, int]]:
         'unmatched_geometry': len(miss_geo),
         'language_columns_raw': lang_raw.shape[1],
         'hearing_columns_raw': hear_raw.shape[1],
+        'language_selected_columns_count': len(lang_cols),
+        'hearing_selected_columns_count': len(hear_cols),
+        'language_selected_missing_total': sum(lang_missing.values()),
+        'hearing_selected_missing_total': sum(hear_missing.values()),
+        'language_selected_missing_by_column': lang_missing,
+        'hearing_selected_missing_by_column': hear_missing,
         'zero_or_missing_lang_den': int(
             (lang_hear['lang_den'].fillna(0) <= 0).sum()),
         'zero_or_missing_hear_den': int(
@@ -84,8 +95,7 @@ def describe_joins(
         'correlation_pearson': round(
             both['lang_rate'].corr(both['hear_rate']), 3),
         'correlation_spearman': round(
-            both['lang_rate'].corr(both['hear_rate'], method='spearman'),
-            3),
+            both['lang_rate'].rank().corr(both['hear_rate'].rank()), 3),
     }
 
 

@@ -38,154 +38,168 @@ LAYOUT = dict(
 )
 
 
-def _geojson(gdf: gpd.GeoDataFrame) -> dict[str, Any]:
+def _geojson(data: gpd.GeoDataFrame) -> dict[str, Any]:
     """
-    Convert gdf indexed by GEOID into a GeoJSON FeatureCollection dict.
-
-    Returns an empty FeatureCollection if gdf has no rows.
+    Convert data indexed by GEOID into a GeoJSON FeatureCollection dictionary.
+    Return an empty FeatureCollection if data is empty.
     """
-    if gdf.empty:
+    if data.empty:
         return {'type': 'FeatureCollection', 'features': []}
-    return json.loads(gdf.set_index('GEOID').to_json())
+
+    return json.loads(data.set_index('GEOID').to_json())
 
 
-def _style_map(
-    fig: go.Figure, gdf: gpd.GeoDataFrame, width: int = 1000,
-    height: int = 700
-) -> go.Figure:
+def _style_map(fig: go.Figure, data: gpd.GeoDataFrame,
+               width: int = 1000, height: int = 700) -> go.Figure:
     """
-    Center and zoom a tile-free map figure on the tract bounds in gdf using
-    the target width and height in pixels. Returns fig.
+    Center and zoom a map figure on the tract boundaries in data for the given
+    width and height. Return the styled figure.
     """
-    west, south, east, north = gdf.total_bounds
+    west, south, east, north = data.total_bounds
     span = max((east - west) * height / width, north - south) * 1.1
     zoom = math.log2(360 * height / (512 * span)) - 0.5
     fig.update_layout(
         map=dict(style='white-bg', zoom=zoom,
                  center=dict(lon=(west + east) / 2,
                              lat=(south + north) / 2)),
-        **LAYOUT)
+        **LAYOUT
+    )
+
     return fig
 
 
-def language_rate_map(gdf: gpd.GeoDataFrame) -> go.Figure:
+def language_rate_map(data: gpd.GeoDataFrame) -> go.Figure:
     """
-    Build a choropleth map of tract-level limited-English rates from gdf.
-
-    Tracts with missing lang_rate are drawn in a separate neutral gray trace
-    labeled 'No 65+ data'. Returns the Plotly Figure.
+    Plot a choropleth map of the limited-English rate by tract from data.
+    Draw tracts with missing data in neutral gray with a separate label.
     """
-    valid = gdf.dropna(subset=['lang_rate'])
-    missing = gdf[gdf['lang_rate'].isna()]
+    valid = data.dropna(subset=['lang_rate'])
+    missing = data[data['lang_rate'].isna()]
     text = [
         f'{geoid}: {rate:.1f}% ({num:.0f} of {den:.0f})'
         for geoid, rate, num, den in zip(
             valid['GEOID'], valid['lang_rate'], valid['lang_num'],
-            valid['lang_den'])
+            valid['lang_den']
+        )
     ]
     traces = [go.Choroplethmap(
         geojson=_geojson(valid), locations=valid['GEOID'],
         z=valid['lang_rate'], colorscale='Blues', text=text,
         hoverinfo='text', marker_line_width=0.3,
         marker_line_color='white',
-        colorbar=dict(title='% of residents<br>age 65+'))]
+        colorbar=dict(title='% of residents<br>age 65+')
+    )]
     if not missing.empty:
         no_data_color = GROUP_COLORS[NO_DATA_GROUP]
         traces.append(go.Choroplethmap(
             geojson=_geojson(missing), locations=missing['GEOID'],
             z=[1] * len(missing),
-            name=f'{NO_DATA_GROUP} ({len(missing)})',
+            name=NO_DATA_GROUP + ' (' + str(len(missing)) + ')',
             colorscale=[[0, no_data_color], [1, no_data_color]],
             showscale=False, showlegend=True,
             marker_line_width=0.3, marker_line_color='white',
-            text=[f'{geoid}: {NO_DATA_GROUP}' for geoid in missing['GEOID']],
-            hoverinfo='text'))
+            text=[geoid + ': ' + NO_DATA_GROUP for geoid in missing['GEOID']],
+            hoverinfo='text'
+        ))
     fig = go.Figure(traces)
     fig.update_layout(
         title='Older adults with limited English by tract, King County',
-        legend=dict(x=0.01, y=0.02))
-    return _style_map(fig, gdf)
+        legend=dict(x=0.01, y=0.02)
+    )
+
+    return _style_map(fig, data)
 
 
-def scatter_rates(df: pd.DataFrame) -> go.Figure:
+def scatter_rates(data: pd.DataFrame) -> go.Figure:
     """
-    Build a scatter plot of hear_rate against lang_rate with one point per
-    tract in df. Returns the Plotly Figure.
+    Plot hearing difficulty rate against limited-English rate in a scatter
+    plot with one point per tract in data.
     """
     fig = px.scatter(
-        df, x='lang_rate', y='hear_rate',
+        data, x='lang_rate', y='hear_rate',
         labels={'lang_rate': 'Limited English, age 65+ (% of tract)',
                 'hear_rate': 'Hearing difficulty, age 65+ (% of tract)'},
         hover_data={'GEOID': True, 'lang_rate': ':.1f',
-                    'hear_rate': ':.1f'})
+                    'hear_rate': ':.1f'}
+    )
     fig.update_traces(marker=dict(
         size=8, color='#2a78d6', opacity=0.7,
-        line=dict(width=1, color='white')))
+        line=dict(width=1, color='white')
+    ))
     fig.update_layout(
         title='Language and hearing difficulty rates by tract',
-        plot_bgcolor='white', **LAYOUT)
+        plot_bgcolor='white', **LAYOUT
+    )
     fig.update_xaxes(gridcolor='#ececea', zeroline=False)
     fig.update_yaxes(gridcolor='#ececea', zeroline=False)
+
     return fig
 
 
 def overlap_bar(counts: dict[str, pd.Series]) -> go.Figure:
     """
-    Build a grouped bar chart comparing tract counts across the four overlap
-    groups for each cutoff in counts. Returns the Plotly Figure.
+    Plot a grouped bar chart comparing tract counts in each overlap group
+    for each cutoff in counts.
     """
     rows = [
         {'Cutoff': cutoff, 'Group': group, 'Tracts': int(series[group])}
-        for cutoff, series in counts.items() for group in GROUPS]
+        for cutoff, series in counts.items() for group in GROUPS
+    ]
     fig = px.bar(
         pd.DataFrame(rows), x='Group', y='Tracts', color='Cutoff',
         barmode='group', text='Tracts',
-        color_discrete_sequence=['#2a78d6', '#eb6834'])
+        color_discrete_sequence=['#2a78d6', '#eb6834']
+    )
     fig.update_traces(textposition='outside')
     fig.update_layout(
         title='Tracts by group at the top-quartile and top-tercile cutoffs',
-        plot_bgcolor='white', **LAYOUT)
+        plot_bgcolor='white', **LAYOUT
+    )
     fig.update_yaxes(gridcolor='#ececea')
+
     return fig
 
 
-def _group_traces(
-    gdf: gpd.GeoDataFrame, visible: bool
-) -> list[go.Choroplethmap]:
+def _group_traces(data: gpd.GeoDataFrame,
+                  visible: bool) -> list[go.Choroplethmap]:
     """
-    Build one Choroplethmap trace per group in MAP_GROUPS from gdf with the
-    given initial visibility. Each trace serializes only its own geometries.
+    Return one choropleth trace per group in MAP_GROUPS from data with the
+    given visibility setting.
     """
     traces = []
     for group in MAP_GROUPS:
-        part = gdf[gdf['group'] == group]
+        part = data[data['group'] == group]
         color = GROUP_COLORS[group]
         traces.append(go.Choroplethmap(
             geojson=_geojson(part), locations=part['GEOID'],
-            z=[1] * len(part), name=f'{group} ({len(part)})',
+            z=[1] * len(part),
+            name=group + ' (' + str(len(part)) + ')',
             colorscale=[[0, color], [1, color]], showscale=False,
             showlegend=True, visible=visible,
             marker_line_width=0.2, marker_line_color='white',
-            text=part['GEOID'], hoverinfo='text+name'))
+            text=part['GEOID'], hoverinfo='text+name'
+        ))
+
     return traces
 
 
-def overlap_map(gdf: gpd.GeoDataFrame, title: str) -> go.Figure:
+def overlap_map(data: gpd.GeoDataFrame, title: str) -> go.Figure:
     """
-    Build a choropleth map of the barrier overlap groups in gdf (including
-    missing-data tracts) with the given title. Returns the Plotly Figure.
+    Plot a choropleth map of the barrier overlap groups in data using the
+    given title.
     """
-    fig = go.Figure(_group_traces(gdf, True))
+    fig = go.Figure(_group_traces(data, True))
     fig.update_layout(title=title, legend_title_text='Group')
-    return _style_map(fig, gdf)
+
+    return _style_map(fig, data)
 
 
 def overlap_map_selectable(
     labeled_by_cutoff: dict[str, gpd.GeoDataFrame]
 ) -> go.Figure:
     """
-    Build an interactive choropleth map with a dropdown menu switching
-    between the labeled cutoff GeoDataFrames in labeled_by_cutoff.
+    Plot an interactive choropleth map with a dropdown menu to switch between
+    the cutoff GeoDataFrames in labeled_by_cutoff.
     """
     names = list(labeled_by_cutoff)
     first = labeled_by_cutoff[names[0]]
@@ -200,8 +214,11 @@ def overlap_map_selectable(
         visible = [j // per_cutoff == i for j in range(total_traces)]
         buttons.append(dict(
             label=name, method='update',
-            args=[{'visible': visible}, {'title': f'Overlap: {name}'}]))
+            args=[{'visible': visible}, {'title': 'Overlap: ' + name}]
+        ))
     fig.update_layout(
-        title=f'Overlap: {names[0]}', legend_title_text='Group',
-        updatemenus=[dict(buttons=buttons, x=0.0, y=1.08)])
+        title='Overlap: ' + names[0], legend_title_text='Group',
+        updatemenus=[dict(buttons=buttons, x=0.0, y=1.08)]
+    )
+
     return _style_map(fig, first)

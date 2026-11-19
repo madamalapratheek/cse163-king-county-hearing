@@ -15,92 +15,100 @@ TOP_TERCILE = 2 / 3
 GROUPS = ['High on both', 'Language only', 'Hearing only', 'Neither']
 
 
-def rank_language(df: pd.DataFrame) -> pd.DataFrame:
+def rank_language(data: pd.DataFrame) -> pd.DataFrame:
     """
-    Rank tracts in df with a non-missing lang_rate from highest to lowest.
-
-    Ties are broken by ascending GEOID. Returns a copy sorted by lang_rate
-    with added integer columns rank_pct (by rate) and rank_count (by
-    lang_num).
+    Rank tracts in data with a non-missing lang_rate from highest to lowest.
+    Break ties by ascending GEOID and add integer columns rank_pct and
+    rank_count.
     """
-    valid = df.dropna(subset=['lang_rate']).copy()
+    valid = data.dropna(subset=['lang_rate']).copy()
     by_pct = valid.sort_values(
-        ['lang_rate', 'GEOID'], ascending=[False, True])
+        ['lang_rate', 'GEOID'], ascending=[False, True]
+    )
     by_pct['rank_pct'] = range(1, len(by_pct) + 1)
     counts = by_pct.sort_values(
-        ['lang_num', 'GEOID'], ascending=[False, True])
+        ['lang_num', 'GEOID'], ascending=[False, True]
+    )
     counts['rank_count'] = range(1, len(counts) + 1)
-    return by_pct.merge(counts[['GEOID', 'rank_count']], on='GEOID')
+    ranked = by_pct.merge(counts[['GEOID', 'rank_count']], on='GEOID')
+
+    return ranked
 
 
-def cutoff_values(df: pd.DataFrame, quantile: float) -> tuple[float, float]:
+def cutoff_values(data: pd.DataFrame, quantile: float) -> tuple[float, float]:
     """
-    Return (language_threshold, hearing_threshold) for lang_rate and hear_rate
-    in df at the given quantile.
+    Return the language and hearing rate threshold values in data at the
+    given quantile.
     """
-    return (float(df['lang_rate'].quantile(quantile)),
-            float(df['hear_rate'].quantile(quantile)))
+    lang_cut = float(data['lang_rate'].quantile(quantile))
+    hear_cut = float(data['hear_rate'].quantile(quantile))
+
+    return lang_cut, hear_cut
 
 
-def classify(
-    df: pd.DataFrame, quantile: float
-) -> tuple[pd.DataFrame, float, float]:
+def classify(data: pd.DataFrame,
+             quantile: float) -> tuple[pd.DataFrame, float, float]:
     """
-    Label each tract in df as high on both, one, or neither barrier at the
-    given quantile cutoff.
+    Label each tract in data as high on both, language only, hearing only,
+    or neither at the given quantile cutoff. Include tied values at the cutoff.
+    """
+    lang_cut, hear_cut = cutoff_values(data, quantile)
+    labeled = data.copy()
+    labeled['high_lang'] = labeled['lang_rate'] >= lang_cut
+    labeled['high_hear'] = labeled['hear_rate'] >= hear_cut
+    labeled['group'] = 'Neither'
+    labeled.loc[labeled['high_lang'] & ~labeled['high_hear'], 'group'] = (
+        'Language only'
+    )
+    labeled.loc[~labeled['high_lang'] & labeled['high_hear'], 'group'] = (
+        'Hearing only'
+    )
+    labeled.loc[labeled['high_lang'] & labeled['high_hear'], 'group'] = (
+        'High on both'
+    )
 
-    Tracts whose rate meets or exceeds the cutoff are marked high so ties at
-    the cutoff are included. Returns (labeled_df, lang_cut, hear_cut).
-    """
-    lang_cut, hear_cut = cutoff_values(df, quantile)
-    out = df.copy()
-    out['high_lang'] = out['lang_rate'] >= lang_cut
-    out['high_hear'] = out['hear_rate'] >= hear_cut
-    out['group'] = 'Neither'
-    out.loc[out['high_lang'] & ~out['high_hear'], 'group'] = 'Language only'
-    out.loc[~out['high_lang'] & out['high_hear'], 'group'] = 'Hearing only'
-    out.loc[out['high_lang'] & out['high_hear'], 'group'] = 'High on both'
-    return out, lang_cut, hear_cut
+    return labeled, lang_cut, hear_cut
 
 
 def group_counts(labeled: pd.DataFrame) -> pd.Series:
     """
-    Count tracts in labeled for each of the four barrier groups.
-
-    Returns a Series indexed in GROUPS order with 0 for any absent group.
+    Return tract counts for each group in labeled, ordered by GROUPS with
+    0 for any empty groups.
     """
     counts = labeled['group'].value_counts()
+
     return counts.reindex(GROUPS, fill_value=0)
 
 
-def count_ties_at_cutoff(
-    df: pd.DataFrame, quantile: float
-) -> tuple[int, int]:
+def count_ties_at_cutoff(data: pd.DataFrame,
+                         quantile: float) -> tuple[int, int]:
     """
-    Return (lang_ties, hear_ties), the counts of tracts in df whose rate
-    equals the cutoff exactly at the given quantile.
+    Return the number of tracts in data whose rate matches the cutoff
+    threshold exactly at the given quantile.
     """
-    lang_cut, hear_cut = cutoff_values(df, quantile)
-    return (int((df['lang_rate'] == lang_cut).sum()),
-            int((df['hear_rate'] == hear_cut).sum()))
+    lang_cut, hear_cut = cutoff_values(data, quantile)
+    lang_ties = int((data['lang_rate'] == lang_cut).sum())
+    hear_ties = int((data['hear_rate'] == hear_cut).sum())
+
+    return lang_ties, hear_ties
 
 
-def new_at_wider_cutoff(
-    narrow: pd.DataFrame, wide: pd.DataFrame
-) -> list[str]:
+def new_at_wider_cutoff(narrow: pd.DataFrame, wide: pd.DataFrame) -> list[str]:
     """
-    Return a sorted list of GEOIDs labeled 'High on both' in wide but not in
-    narrow.
+    Return a sorted list of GEOIDs labeled High on both at the wider cutoff
+    that were not in the narrow cutoff.
     """
     narrow_ids = set(narrow.loc[narrow['group'] == 'High on both', 'GEOID'])
     wide_ids = set(wide.loc[wide['group'] == 'High on both', 'GEOID'])
+
     return sorted(wide_ids - narrow_ids)
 
 
-def summary_stats(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
+def summary_stats(data: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
     """
-    Return a seven-number summary (mean, std, min, 25%, 50%, 75%, max) for
-    each column listed in columns from df.
+    Return a seven-number summary table (mean, std, min, 25%, 50%, 75%, max)
+    for each column in columns from data.
     """
-    stats = df[columns].describe().T
+    stats = data[columns].describe().T
+
     return stats[['mean', 'std', 'min', '25%', '50%', '75%', 'max']]
